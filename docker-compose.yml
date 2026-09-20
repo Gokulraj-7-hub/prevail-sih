@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "${PREVAIL_API_PORT:-8000}:8000"
     environment:
       - PREVAIL_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
     healthcheck:
@@ -20,7 +20,7 @@ services:
       args:
         NEXT_PUBLIC_API_BASE: http://localhost:8000/api/v1
     ports:
-      - "3000:3000"
+      - "${PREVAIL_FRONTEND_PORT:-3000}:3000"
     depends_on:
       api:
         condition: service_healthy

@@ -47,8 +47,8 @@ Tracks master prompt §36 literally. Updated 2026-09-20, single continuous auton
 
 - [x] FastAPI — 10 endpoints, live-tested with curl and pytest
 - [x] frontend — Next.js dashboard, 7 tabs, live-tested with Playwright against the real API
-- [~] offline operation — static code verification done (no outbound calls anywhere); true network-egress-blocked runtime test was environment-limited, see `docs/architecture/offline-verification.md`
-- [x] Docker — `Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml`; see below for build/run verification status
+- [x] offline operation — static code verification (no outbound calls anywhere) AND a live `docker compose` smoke test (health -> load telemetry -> forecast -> dashboard render, all passing) done; the one remaining gap is a true network-egress-*blocked* runtime test, which was environment-limited (no host firewall admin) — see `docs/architecture/offline-verification.md`
+- [x] Docker — `Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml`; built and live-tested end-to-end, including catching and fixing a real undeclared-dependency bug (`pyarrow`, DECISIONS.md D-011) that only surfaced in the from-scratch container build
 - [~] security testing — threat-model checklist mostly verified (static checks + unit tests), some items explicitly still Planned (auth layer, CSP header, dependency-audit automation) — see `docs/architecture/threat-model.md`
 - [x] automated tests — unit/integration/property, 21 tests passing (`.venv/bin/python -m pytest tests/ -q`)
 

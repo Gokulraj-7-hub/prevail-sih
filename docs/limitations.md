@@ -26,8 +26,9 @@ Consolidated from `docs/experiments/*.md` and `DECISIONS.md`. This file exists b
 
 ## Product / offline / security
 
-- Offline packaging (Docker), the FastAPI backend, and the frontend dashboard are not yet built as of this pass (see `README.md` progress tracker) — everything above ran via `scripts/*.py`, not through the eventual product surface.
-- Threat-model mitigations (`docs/architecture/threat-model.md`) are mostly "planned," not yet implemented/verified against a real API surface.
+- Docker packaging, the FastAPI backend, and the frontend dashboard are built and live-tested end-to-end (`scripts/offline_smoke_test.sh` passes; see `docs/architecture/offline-verification.md`). A true network-egress-*blocked* runtime test (vs. the functional smoke test that was actually run) is still outstanding — environment-limited, not skipped.
+- Real binary PCAP parsing was not implemented — ingestion currently accepts the packet-event CSV interchange format only (see `threat-model.md`'s note on "Unsafe file parsing" scope).
+- Most threat-model mitigations are now verified (not just planned) against the real API surface — see the updated status column in `docs/architecture/threat-model.md`. Remaining "Planned" items: an auth layer (do not expose beyond localhost as currently built), a CSP header, automated dependency-vulnerability scanning in CI, and subprocess-isolated parsing for a future binary-PCAP ingestion path.
 
 ## General
 

@@ -1,6 +1,20 @@
 # Offline / Air-Gapped Operation — Verification (Phase 21)
 
-Status: partially verified. Two layers of verification, one done, one only partially achievable in this environment.
+Status: functionally verified end-to-end via `scripts/offline_smoke_test.sh` against the real Docker Compose stack (2026-09-20) — health check, demo-dataset load, forecast, and dashboard render all passed. Egress-blocked network isolation itself was not independently re-verified (see §2 below). Two layers of verification, one done, one only partially achievable in this environment.
+
+## 0. Live smoke-test result
+
+```text
+== Waiting for API health ==
+API healthy after 1s
+== Loading sample telemetry (demo dataset) ==
+== Running forecast ==
+== Checking dashboard renders ==
+Dashboard OK after 2s
+== ALL CHECKS PASSED ==
+```
+
+This caught a real bug on the first attempt: `pyarrow` was installed ad hoc in the local dev `.venv` but never declared in `pyproject.toml`, so the from-scratch Docker image crashed on startup (`ImportError: ... pyarrow or fastparquet is required`). Fixed by declaring the dependency (see `DECISIONS.md` D-011) — exactly the kind of gap this smoke test exists to catch, and it worked as intended.
 
 ## 1. Static code verification (done)
 

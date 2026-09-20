@@ -1,0 +1,17 @@
+Prediction: initial_access
+
+Important evidence:
+1. flow__tcp_syn_ratio (increased confidence, shap=0.109)
+2. temporal__new_connection_rate (decreased confidence, shap=-0.068)
+3. flow__new_connection_count (decreased confidence, shap=-0.059)
+4. packet__ttl_distinct_count (increased confidence, shap=0.051)
+5. flow__tcp_psh_ratio (increased confidence, shap=0.049)
+
+Important windows:
+T-1 (relative importance=1.00)
+T-9 (relative importance=0.04)
+T-10 (relative importance=0.04)
+T-3 (relative importance=0.03)
+T-2 (relative importance=0.03)
+
+Evidence shows what the model's prediction is sensitive to (feature attribution + input-window sensitivity). It is NOT a causal explanation of the underlying network activity.

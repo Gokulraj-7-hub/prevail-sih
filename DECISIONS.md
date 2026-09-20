@@ -132,7 +132,17 @@ Format per master prompt §34: Decision / Context / Alternatives / Evidence / Ch
 
 ---
 
-## D-010: Add an out-of-distribution sanity flag to every intervention output, after the first real intervention test moved P(attack) the WRONG direction
+## D-011: `pyarrow` was an undeclared dependency — found by the offline Docker smoke test doing exactly its job
+
+**Context:** Local development installed `pyarrow` ad hoc (`pip install pyarrow`, for parquet I/O) directly into `.venv`, but it was never added to `pyproject.toml`. Everything worked locally because the venv had it installed regardless of what was declared. The first `docker compose build` + smoke test run (built purely from `pyproject.toml`, no inherited venv state) crashed on startup: `ImportError: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'` when `DatasetStore._load_demo_dataset()` called `pd.read_parquet`.
+
+**Chosen option:** Added `pyarrow` to `pyproject.toml` dependencies.
+
+**Reason/evidence:** This is precisely the class of bug an offline/reproducibility smoke test exists to catch — an undeclared dependency that a local dev environment silently papers over. It would have shipped broken to anyone building the Docker image fresh, or onto a clean machine, without ever surfacing in local `pytest` runs (which also ran against the same already-populated `.venv`).
+
+**Secondary finding, same debugging pass**: `docker compose build api 2>&1 | tail -40` reported `exit code 0` on a build that had actually *failed* (`pip install` hit a `ReadTimeoutError` on this environment's slow/flaky connection to PyTorch's CDN) — because in a `cmd1 | cmd2` pipeline, the shell's exit code is `cmd2`'s (`tail`'s, which succeeds trivially), not `cmd1`'s. This produced a false "success" signal that would have let a broken image pass unnoticed. Fixed by redirecting to a log file and checking `$?` directly instead of piping through `tail`, and by reordering the Dockerfile so `torch` installs in its own early layer (rarely invalidated) ahead of `COPY src/` (invalidated on every code change) — both a build-speed fix and, incidentally, why the *second* rebuild attempt only needed to redownload the small `pip install -e .` layer instead of the full ~200MB torch wheel again.
+
+**Trade-offs:** None — this is a straightforward correctness fix plus a general "don't trust exit codes through an unguarded pipe" lesson worth keeping in mind for any future CI/build scripting in this repo.: Add an out-of-distribution sanity flag to every intervention output, after the first real intervention test moved P(attack) the WRONG direction
 
 **Context:** First end-to-end run of the what-if simulator (`scripts/intervention_demo.py`) on a held-out attack scenario showed BOTH tested interventions (`block_destination_port`, `isolate_host`) *increasing* forecast P(attack) rather than decreasing it (see `docs/experiments/intervention.md` for full numbers). Before concluding anything about why, the first thing to rule out was "is the modified state simply nonsense/out-of-distribution, and the model is extrapolating wildly."
 

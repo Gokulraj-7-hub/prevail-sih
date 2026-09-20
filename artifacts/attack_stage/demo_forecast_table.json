@@ -1,0 +1,119 @@
+{
+  "scenario_id": "scn_009_attack",
+  "start_window": 22,
+  "table": [
+    {
+      "step": 1,
+      "predicted_stage": "initial_access",
+      "stage_probability": 0.6007351463780017,
+      "p_attack": 0.6183728373214048,
+      "all_stage_probs": {
+        "benign": 0.38162716267859514,
+        "recon": 0.0034913972536684567,
+        "initial_access": 0.6007351463780017,
+        "lateral_movement": 0.005,
+        "command_and_control": 0.009146293689734861
+      },
+      "attck_tactic": {
+        "id": "TA0001",
+        "name": "Initial Access"
+      },
+      "attck_technique": {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application"
+      },
+      "attck_mapping_confidence": "low"
+    },
+    {
+      "step": 2,
+      "predicted_stage": "initial_access",
+      "stage_probability": 0.5879460596648479,
+      "p_attack": 0.5984797402660191,
+      "all_stage_probs": {
+        "benign": 0.4015202597339808,
+        "recon": 0.0008190256536989611,
+        "initial_access": 0.5879460596648479,
+        "lateral_movement": 0.0005683612577375278,
+        "command_and_control": 0.009146293689734861
+      },
+      "attck_tactic": {
+        "id": "TA0001",
+        "name": "Initial Access"
+      },
+      "attck_technique": {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application"
+      },
+      "attck_mapping_confidence": "low"
+    },
+    {
+      "step": 3,
+      "predicted_stage": "lateral_movement",
+      "stage_probability": 0.8964583889826224,
+      "p_attack": 0.9224634739311135,
+      "all_stage_probs": {
+        "benign": 0.07753652606888649,
+        "recon": 0.0,
+        "initial_access": 0.02100508494849113,
+        "lateral_movement": 0.8964583889826224,
+        "command_and_control": 0.005
+      },
+      "attck_tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement"
+      },
+      "attck_technique": {
+        "id": "T1021",
+        "name": "Remote Services",
+        "sub": "T1021.002 SMB/Windows Admin Shares (best-fit among ports used)"
+      },
+      "attck_mapping_confidence": "medium"
+    },
+    {
+      "step": 4,
+      "predicted_stage": "lateral_movement",
+      "stage_probability": 0.9949675066034968,
+      "p_attack": 0.9999675066034968,
+      "all_stage_probs": {
+        "benign": 3.249339650329127e-05,
+        "recon": 0.0,
+        "initial_access": 0.005,
+        "lateral_movement": 0.9949675066034968,
+        "command_and_control": 0.0
+      },
+      "attck_tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement"
+      },
+      "attck_technique": {
+        "id": "T1021",
+        "name": "Remote Services",
+        "sub": "T1021.002 SMB/Windows Admin Shares (best-fit among ports used)"
+      },
+      "attck_mapping_confidence": "medium"
+    },
+    {
+      "step": 5,
+      "predicted_stage": "lateral_movement",
+      "stage_probability": 1.0,
+      "p_attack": 1.0,
+      "all_stage_probs": {
+        "benign": 0.0,
+        "recon": 0.0,
+        "initial_access": 0.0,
+        "lateral_movement": 1.0,
+        "command_and_control": 0.0
+      },
+      "attck_tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement"
+      },
+      "attck_technique": {
+        "id": "T1021",
+        "name": "Remote Services",
+        "sub": "T1021.002 SMB/Windows Admin Shares (best-fit among ports used)"
+      },
+      "attck_mapping_confidence": "medium"
+    }
+  ]
+}

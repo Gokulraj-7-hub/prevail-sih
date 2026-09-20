@@ -1,0 +1,150 @@
+{
+  "experiment_name": "C_temporal_transformer_one_step",
+  "git_commit": "a7301e1e9933fe568e25dcc4396e446cd0ec0b51",
+  "dataset_version": "synthetic-v1-seed42",
+  "feature_version": "feature_registry-v1",
+  "model_version": "prevail-world-model-v1",
+  "config": {
+    "window_size_s": 5,
+    "seq_len": 10,
+    "d_model": 64,
+    "n_heads": 4,
+    "n_layers": 3,
+    "dropout": 0.1
+  },
+  "seed": 42,
+  "hardware": {
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3"
+  },
+  "metrics": {
+    "feature_level_error": {
+      "overall_mae": 1109594.9097844446,
+      "overall_mse": 271928586507335.12,
+      "overall_mae_normalized": 0.3275764630342365,
+      "overall_mse_normalized": 0.36892286911682365,
+      "worst_10_features_by_normalized_mse": {
+        "flow__tcp_fin_ratio": {
+          "mae": 0.02578308914524472,
+          "mse": 0.0012566331247906935,
+          "mae_normalized": 0.7479085018388536,
+          "mse_normalized": 1.0573908386354633
+        },
+        "temporal__delta_packets_sum": {
+          "mae": 12.37161537620533,
+          "mse": 904.1535729401868,
+          "mae_normalized": 0.4211274258413811,
+          "mse_normalized": 1.0476505247886225
+        },
+        "temporal__delta_new_connection_count": {
+          "mae": 6.454093644228333,
+          "mse": 399.9998933179415,
+          "mae_normalized": 0.32091688579981775,
+          "mse_normalized": 0.9889503509724186
+        },
+        "flow__proto_icmp_ratio": {
+          "mae": 0.016088863567349447,
+          "mse": 0.0004280041584904418,
+          "mae_normalized": 0.7461894209137934,
+          "mse_normalized": 0.920651840960022
+        },
+        "temporal__burstiness": {
+          "mae": 0.12313291568427574,
+          "mse": 0.029552453333198486,
+          "mae_normalized": 0.6532212892679058,
+          "mse_normalized": 0.8316984162936688
+        },
+        "packet__retransmission_ratio": {
+          "mae": 0.020149324861755316,
+          "mse": 0.0007954569572514672,
+          "mae_normalized": 0.6216832640292766,
+          "mse_normalized": 0.7572408582738887
+        },
+        "flow__proto_udp_ratio": {
+          "mae": 0.043691279541123326,
+          "mse": 0.0031241586197621398,
+          "mae_normalized": 0.6778565968101041,
+          "mse_normalized": 0.7520023578864681
+        },
+        "temporal__delta_bytes_sum": {
+          "mae": 4847.708491297726,
+          "mse": 72610277.69696973,
+          "mae_normalized": 0.490832336548704,
+          "mse_normalized": 0.7443744166713081
+        },
+        "flow__proto_tcp_ratio": {
+          "mae": 0.04644100477243594,
+          "mse": 0.003450194842544159,
+          "mae_normalized": 0.6711077740736784,
+          "mse_normalized": 0.7204850046857255
+        },
+        "flow__tcp_psh_ratio": {
+          "mae": 0.007049322308799112,
+          "mse": 0.00014471784785091504,
+          "mae_normalized": 0.4955689216884319,
+          "mse_normalized": 0.7152131412689613
+        }
+      }
+    },
+    "state_similarity": {
+      "mean_cosine_similarity": 0.7135420054207896,
+      "min_cosine_similarity": -0.9999987017956377
+    },
+    "attack_stage_accuracy": {
+      "accuracy": 0.94
+    },
+    "calibration": {
+      "brier_score": 0.04863695427775383,
+      "reliability_bins": [
+        {
+          "bin_center": 0.05,
+          "predicted_mean": 0.02302122674882412,
+          "observed_rate": 0.04591836734693878,
+          "count": 392
+        },
+        {
+          "bin_center": 0.45,
+          "predicted_mean": 0.44316673278808594,
+          "observed_rate": 0.75,
+          "count": 4
+        },
+        {
+          "bin_center": 0.55,
+          "predicted_mean": 0.5709336996078491,
+          "observed_rate": 0.25,
+          "count": 4
+        },
+        {
+          "bin_center": 0.75,
+          "predicted_mean": 0.7402133345603943,
+          "observed_rate": 0.5,
+          "count": 2
+        },
+        {
+          "bin_center": 0.8500000000000001,
+          "predicted_mean": 0.8628754615783691,
+          "observed_rate": 0.875,
+          "count": 8
+        },
+        {
+          "bin_center": 0.95,
+          "predicted_mean": 0.9803665280342102,
+          "observed_rate": 0.9666666666666667,
+          "count": 90
+        }
+      ]
+    },
+    "temporal_consistency": {
+      "trend_correlation": 0.5417764436292113
+    },
+    "training_history": {
+      "best_val_loss": 0.16671141386032104,
+      "epochs_run": 26
+    }
+  },
+  "timestamp_utc": "2026-09-20T04:12:05.124220+00:00",
+  "extra": {
+    "data_source": "SYNTHETIC VALIDATION DATA - not a real-world benchmark result"
+  }
+}

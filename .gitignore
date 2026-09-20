@@ -13,9 +13,8 @@ data/interim/*
 data/processed/*
 !data/processed/.gitkeep
 data/uploads/
-artifacts/*
-!artifacts/.gitkeep
 *.log
 .DS_Store
 .env
 .env.local
+.claude/

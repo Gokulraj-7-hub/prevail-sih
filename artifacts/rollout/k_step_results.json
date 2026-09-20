@@ -1,0 +1,143 @@
+{
+  "K=1": {
+    "n_trajectories": 460,
+    "per_step": [
+      {
+        "k": 1,
+        "normalized_mse": 0.37614671006617184,
+        "cosine_similarity": 0.6955871177738376,
+        "stage_accuracy": 0.9391304347826087,
+        "mean_p_attack": 0.23646242916584015,
+        "precision": 0.9230769230769231,
+        "recall": 0.8347826086956521,
+        "f1": 0.8767123287671234,
+        "false_positive_rate": 0.02318840579710145
+      }
+    ]
+  },
+  "K=2": {
+    "n_trajectories": 460,
+    "per_step": [
+      {
+        "k": 1,
+        "normalized_mse": 0.37614671006617184,
+        "cosine_similarity": 0.6955871177738376,
+        "stage_accuracy": 0.9391304347826087,
+        "mean_p_attack": 0.23646242916584015,
+        "precision": 0.9230769230769231,
+        "recall": 0.8347826086956521,
+        "f1": 0.8767123287671234,
+        "false_positive_rate": 0.02318840579710145
+      },
+      {
+        "k": 2,
+        "normalized_mse": 0.5296600847165768,
+        "cosine_similarity": 0.769455637264635,
+        "stage_accuracy": 0.8956521739130435,
+        "mean_p_attack": 0.2207566648721695,
+        "precision": 0.8787878787878788,
+        "recall": 0.75,
+        "f1": 0.8093023255813953,
+        "false_positive_rate": 0.03488372093023256
+      }
+    ]
+  },
+  "K=3": {
+    "n_trajectories": 460,
+    "per_step": [
+      {
+        "k": 1,
+        "normalized_mse": 0.37614671006617184,
+        "cosine_similarity": 0.6955871177738376,
+        "stage_accuracy": 0.9391304347826087,
+        "mean_p_attack": 0.23646242916584015,
+        "precision": 0.9230769230769231,
+        "recall": 0.8347826086956521,
+        "f1": 0.8767123287671234,
+        "false_positive_rate": 0.02318840579710145
+      },
+      {
+        "k": 2,
+        "normalized_mse": 0.5296600847165768,
+        "cosine_similarity": 0.769455637264635,
+        "stage_accuracy": 0.8956521739130435,
+        "mean_p_attack": 0.2207566648721695,
+        "precision": 0.8787878787878788,
+        "recall": 0.75,
+        "f1": 0.8093023255813953,
+        "false_positive_rate": 0.03488372093023256
+      },
+      {
+        "k": 3,
+        "normalized_mse": 0.6679048433546314,
+        "cosine_similarity": 0.7868679329381529,
+        "stage_accuracy": 0.8630434782608696,
+        "mean_p_attack": 0.2005387395620346,
+        "precision": 0.8735632183908046,
+        "recall": 0.6608695652173913,
+        "f1": 0.7524752475247524,
+        "false_positive_rate": 0.03188405797101449
+      }
+    ]
+  },
+  "K=5": {
+    "n_trajectories": 460,
+    "per_step": [
+      {
+        "k": 1,
+        "normalized_mse": 0.37614671006617184,
+        "cosine_similarity": 0.6955871177738376,
+        "stage_accuracy": 0.9391304347826087,
+        "mean_p_attack": 0.23646242916584015,
+        "precision": 0.9230769230769231,
+        "recall": 0.8347826086956521,
+        "f1": 0.8767123287671234,
+        "false_positive_rate": 0.02318840579710145
+      },
+      {
+        "k": 2,
+        "normalized_mse": 0.5296600847165768,
+        "cosine_similarity": 0.769455637264635,
+        "stage_accuracy": 0.8956521739130435,
+        "mean_p_attack": 0.2207566648721695,
+        "precision": 0.8787878787878788,
+        "recall": 0.75,
+        "f1": 0.8093023255813953,
+        "false_positive_rate": 0.03488372093023256
+      },
+      {
+        "k": 3,
+        "normalized_mse": 0.6679048433546314,
+        "cosine_similarity": 0.7868679329381529,
+        "stage_accuracy": 0.8630434782608696,
+        "mean_p_attack": 0.2005387395620346,
+        "precision": 0.8735632183908046,
+        "recall": 0.6608695652173913,
+        "f1": 0.7524752475247524,
+        "false_positive_rate": 0.03188405797101449
+      },
+      {
+        "k": 4,
+        "normalized_mse": 0.7578409346729847,
+        "cosine_similarity": 0.8260015384486538,
+        "stage_accuracy": 0.8478260869565217,
+        "mean_p_attack": 0.18878763914108276,
+        "precision": 0.8536585365853658,
+        "recall": 0.6306306306306306,
+        "f1": 0.7253886010362693,
+        "false_positive_rate": 0.034383954154727794
+      },
+      {
+        "k": 5,
+        "normalized_mse": 0.7691375949091369,
+        "cosine_similarity": 0.8607821837705135,
+        "stage_accuracy": 0.8521739130434782,
+        "mean_p_attack": 0.1753959357738495,
+        "precision": 0.8533333333333334,
+        "recall": 0.6095238095238096,
+        "f1": 0.7111111111111111,
+        "false_positive_rate": 0.030985915492957747
+      }
+    ]
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "experiment_name": "attack_stage_classifier",
+  "git_commit": "0d7722dfcdab6bbd606fa01d4f374eda6bd534d1",
+  "dataset_version": "synthetic-v1-seed42",
+  "feature_version": "feature_registry-v1",
+  "model_version": "rf-stage-classifier-v1",
+  "config": {
+    "n_estimators": 200,
+    "max_depth": 8
+  },
+  "seed": 42,
+  "hardware": {
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3"
+  },
+  "metrics": {
+    "classification_report": {
+      "benign": {
+        "precision": 0.969758064516129,
+        "recall": 1.0,
+        "f1-score": 0.984646878198567,
+        "support": 481.0
+      },
+      "recon": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 40.0
+      },
+      "initial_access": {
+        "precision": 1.0,
+        "recall": 0.6875,
+        "f1-score": 0.8148148148148148,
+        "support": 16.0
+      },
+      "lateral_movement": {
+        "precision": 1.0,
+        "recall": 0.9811320754716981,
+        "f1-score": 0.9904761904761905,
+        "support": 53.0
+      },
+      "command_and_control": {
+        "precision": 1.0,
+        "recall": 0.1,
+        "f1-score": 0.18181818181818182,
+        "support": 10.0
+      },
+      "accuracy": 0.975,
+      "macro avg": {
+        "precision": 0.9939516129032258,
+        "recall": 0.7537264150943396,
+        "f1-score": 0.7943512130615508,
+        "support": 600.0
+      },
+      "weighted avg": {
+        "precision": 0.9757560483870967,
+        "recall": 0.975,
+        "f1-score": 0.9682760089399461,
+        "support": 600.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        481,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        40,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        11,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        52,
+        0
+      ],
+      [
+        9,
+        0,
+        0,
+        0,
+        1
+      ]
+    ]
+  },
+  "timestamp_utc": "2026-09-20T04:15:43.212691+00:00",
+  "extra": {
+    "data_source": "SYNTHETIC VALIDATION DATA - not a real-world benchmark result"
+  }
+}

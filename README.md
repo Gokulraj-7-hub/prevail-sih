@@ -90,7 +90,7 @@ cd frontend && npm install && npm run dev   # Next.js on :3000
 
 ## Offline operation
 
-See `docs/architecture/offline-verification.md` — static code verification (no outbound calls anywhere in the inference path) is done; a true network-egress-blocked runtime test was environment-limited and is documented as a follow-up, not silently skipped.
+`docker compose up --build` + `scripts/offline_smoke_test.sh` passes end-to-end (health → load demo telemetry → forecast → dashboard render), and static code verification confirms zero outbound network calls anywhere in the inference path. This process caught and fixed a real bug: an undeclared `pyarrow` dependency that only surfaced in a from-scratch container build, not in local dev (see `DECISIONS.md` D-011). A true network-*egress-blocked* runtime test was environment-limited (no host firewall admin in this sandbox) — see `docs/architecture/offline-verification.md` for exactly what is and isn't verified.
 
 ## Limitations
 
