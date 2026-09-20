@@ -39,6 +39,36 @@ def _window_attack_stage(window_pkts: pd.DataFrame) -> str:
     return "benign"
 
 
+def compute_window_row(
+    wpkts: pd.DataFrame,
+    prev_flow_feats: dict | None,
+    window_size_s: float,
+    trailing_bytes: list[float],
+    has_packet_data: bool = True,
+) -> tuple[dict, dict]:
+    """Feature computation for exactly one window's packets. Factored out of
+    build_states so prevail.intervention can recompute a single (modified)
+    window honestly through the same feature-extraction code path, instead of
+    hand-editing feature numbers (see DECISIONS.md D-009)."""
+    flow_feats = compute_flow_features(wpkts)
+    packet_feats = compute_packet_features(wpkts, has_packet_data=has_packet_data)
+    temporal_feats = compute_temporal_features(flow_feats, prev_flow_feats, window_size_s, trailing_bytes)
+    stage = _window_attack_stage(wpkts)
+
+    row = {"attack_stage": stage, "attack_label": int(stage != "benign")}
+    for k, v in flow_feats.items():
+        row[f"flow__{k}"] = v
+    if packet_feats is not None:
+        for k, v in packet_feats.items():
+            row[f"packet__{k}"] = v
+    else:
+        for k in PACKET_FEATURES:
+            row[f"packet__{k}"] = None
+    for k, v in temporal_feats.items():
+        row[f"temporal__{k}"] = v
+    return row, flow_feats
+
+
 def build_states(
     packets: pd.DataFrame,
     window_size_s: float = DEFAULT_WINDOW_SIZE_S,
@@ -60,33 +90,15 @@ def build_states(
 
         for wid in range(0, max_window + 1):
             wpkts = by_window.get(wid, sdf.iloc[0:0])
-            flow_feats = compute_flow_features(wpkts)
-            packet_feats = compute_packet_features(wpkts, has_packet_data=has_packet_data)
-            temporal_feats = compute_temporal_features(
-                flow_feats, prev_flow_feats, window_size_s, trailing_bytes
-            )
-            stage = _window_attack_stage(wpkts)
-
-            row = {
+            row, flow_feats = compute_window_row(wpkts, prev_flow_feats, window_size_s, trailing_bytes, has_packet_data)
+            row.update({
                 "scenario_id": scenario_id,
                 "window_id": wid,
                 "window_start": scenario_start + wid * window_size_s,
                 "window_end": scenario_start + (wid + 1) * window_size_s,
                 "timestamp": scenario_start + (wid + 1) * window_size_s,
                 "window_size_s": window_size_s,
-                "attack_stage": stage,
-                "attack_label": int(stage != "benign"),
-            }
-            for k, v in flow_feats.items():
-                row[f"flow__{k}"] = v
-            if packet_feats is not None:
-                for k, v in packet_feats.items():
-                    row[f"packet__{k}"] = v
-            else:
-                for k in PACKET_FEATURES:
-                    row[f"packet__{k}"] = None
-            for k, v in temporal_feats.items():
-                row[f"temporal__{k}"] = v
+            })
             rows.append(row)
 
             prev_flow_feats = flow_feats

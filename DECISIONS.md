@@ -115,3 +115,31 @@ Format per master prompt §34: Decision / Context / Alternatives / Evidence / Ch
 **Reason:** Raw-unit MSE across features with wildly different natural scales (a [0,1] ratio vs. a rolling variance of byte-count sums) isn't comparable and produces a misleading "worst features" ranking that would mislead any later ablation/architecture decision made by reading this report.
 
 **Trade-offs:** None material -- this is a strictly more correct evaluation; raw units are kept alongside for interpretability, not removed.
+
+---
+
+## D-009: Interventions are packet-level filters, not feature-level edits
+
+**Context:** Building the what-if simulator (Milestone 9), the natural-seeming shortcut is to directly edit a state's feature vector (e.g. set `unique_dst_ip_count -= 1` to simulate isolating a host). But PREVAIL's feature registry deliberately has no raw-IP features (data-contract.md: avoids host-identity overfitting) — there is nothing to "edit" that corresponds to a specific host, and hand-editing one aggregate feature would leave the other 58 correlated features inconsistent with a real filtered-traffic scenario.
+
+**Alternatives:** (a) feature-level edits, fast but dishonest — the "modified state" wouldn't be a state any real filtered packet capture could actually produce; (b) packet-level filtering — apply the intervention as a filter on the current window's raw packets, then recompute that window's features through the exact same `features/` pipeline used everywhere else.
+
+**Chosen option:** (b). Implemented by factoring `compute_window_row` out of `states/builder.py` (previously inline in `build_states`'s loop) so `intervention/simulator.py` can call the identical code path on a filtered packet set.
+
+**Reason:** Master prompt: "Only support interventions that can be represented honestly in the state representation." A feature-level edit cannot be honest when the representation was specifically designed not to contain the thing being intervened on (host identity). Packet-level filtering keeps the "modified simulated state" a real, internally-consistent state — every one of the ~59 features is recomputed together, not just the one an engineer thought to touch.
+
+**Trade-offs:** Requires retaining access to raw packets alongside the states table at simulation time (not just the precomputed feature parquet) — acceptable since the API layer will need the raw capture available anyway for the initial `/analyze` step.
+
+---
+
+## D-010: Add an out-of-distribution sanity flag to every intervention output, after the first real intervention test moved P(attack) the WRONG direction
+
+**Context:** First end-to-end run of the what-if simulator (`scripts/intervention_demo.py`) on a held-out attack scenario showed BOTH tested interventions (`block_destination_port`, `isolate_host`) *increasing* forecast P(attack) rather than decreasing it (see `docs/experiments/intervention.md` for full numbers). Before concluding anything about why, the first thing to rule out was "is the modified state simply nonsense/out-of-distribution, and the model is extrapolating wildly."
+
+**Chosen option:** Added `intervention.simulator.out_of_distribution_score` / `is_out_of_distribution` — mean |z-score| of the modified state against the World Model's own training-distribution mean/std, threshold calibrated empirically at 1.15 (the ~92nd percentile of mean-|z| across all 2400 real synthetic states, not an arbitrary guess).
+
+**Evidence:** Both tested interventions' modified states scored 0.55-0.58, well within the normal range — ruling out "obviously broken input" as the explanation for the counter-intuitive result. The result is therefore an honest, in-distribution model limitation (see `docs/experiments/intervention.md` for the leading hypothesis: the training data contains zero examples of a post-intervention window, so neither model has ever been taught what successful defense looks like), not a pipeline bug.
+
+**Reason:** A what-if simulator that can silently feed a model a nonsensical, never-seen-anything-like-it input and present the output as a confident forecast is a real safety/honesty risk for a security tool. A cheap sanity check that can at least distinguish "confidently wrong because untrained-on-this" from "confidently wrong because the input itself is garbage" is worth having even at V1, and directly enabled the honest root-cause writeup in `docs/experiments/intervention.md` instead of a guess.
+
+**Trade-offs:** This is a coarse, non-rigorous OOD detector (mean |z| across independent per-feature scores, ignoring feature correlations) — a proper Mahalanobis-distance or learned density model would be more rigorous. Flagged as a possible follow-up, not blocking, since even this coarse version already ruled out the simplest failure mode.
