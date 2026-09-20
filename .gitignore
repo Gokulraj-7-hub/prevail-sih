@@ -12,6 +12,7 @@ data/interim/*
 !data/interim/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+data/uploads/
 artifacts/*
 !artifacts/.gitkeep
 *.log
