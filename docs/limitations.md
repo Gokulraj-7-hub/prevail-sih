@@ -4,7 +4,8 @@ Consolidated from `docs/experiments/*.md` and `DECISIONS.md`. This file exists b
 
 ## Data
 
-- **All results to date are on a synthetic validation dataset** (`prevail.ingestion.synthetic`, DECISIONS.md D-003), not a real-world network capture. No number in this repo should be quoted as evidence of real-world detection/forecasting performance. Real-dataset integration is the top tracked open item (`docs/research/open-questions.md` OQ-2).
+- **All results to date are on a synthetic validation dataset** (`prevail.ingestion.synthetic`, DECISIONS.md D-003), not a real-world network capture. No number in this repo should be quoted as evidence of real-world detection/forecasting performance.
+- **Real-dataset integration is attempted and blocked, not merely unscheduled.** CTU-13 was researched and selected (`docs/research/real-dataset-integration.md`), but a pre-implementation verification pass found the required 843MB-1.2GB file cannot be reliably downloaded from this environment's network (~65% connection-failure rate, ~17 KB/s when it does connect — `DECISIONS.md` D-012). No adapter code exists. This is the single most consequential open item in the repo (`docs/research/open-questions.md` OQ-2), and it is a data-access problem, not an architecture problem — the ingestion contract is already confirmed compatible in principle.
 - The synthetic dataset has only 40 scenarios; the rarest attack stages (`command_and_control`: 21 windows total, `initial_access`: ~83) have too little support to trust their recall estimates (see `docs/experiments/attack-stage.md`).
 - The primary source document named by the original task prompt (`bugbounty guide.pdf`) was never available in this environment (OQ-1) — requirements were cross-checked against the master prompt text and independent research into the public SIH26153 problem statement instead, not against that specific file.
 

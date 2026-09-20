@@ -194,3 +194,48 @@ it as designed-for rather than as a failure to route around quietly.
 correctly state real-dataset integration as the top open item; this entry is the record of why it's
 still open despite two full research passes, so a future session doesn't have to re-derive the same
 finding from scratch.
+
+## RL-7 — 2026-09-20 — Final wrap-up of this session's real-dataset work
+
+**Question:** Given RL-6's confirmed download-feasibility blocker, and no further attempt made to
+resolve it this session, what is the honest final status to record and leave for next time?
+
+**Sources checked:** This session's own record (RL-5, RL-6, `DECISIONS.md` D-003/D-011/D-012,
+`docs/research/real-dataset-integration.md` §1-§11). No new external research performed in this
+entry — this is a close-out, not a new investigation.
+
+**Finding:** Real-dataset integration was attempted twice this session: once as pure research
+(RL-5, recommended CTU-13 on sound evidence-based grounds — the only candidate with genuine
+temporal, continuous-capture attacker behavior rather than scheduled discrete exercises), and once
+as a verification-before-implementation pass (RL-6, per the user's own approved 16-phase plan's
+Phase 1 gate). RL-6 found two wrong assumptions (file content, label format) and — the actually
+blocking one — that this environment's network cannot reliably obtain the file CTU-13 integration
+would need (~65% connection-failure rate, ~17 KB/s sustained on the one successful attempt,
+extrapolating to 14-20+ hours for an 843MB-1.2GB file). No adapter code was written. Four options
+were presented to the user (retry later/different network, scoped-down attack-only partial
+validation, investigate the bidirectional-flow files, or defer); the user's follow-up instruction
+was to log the outcome and wrap up rather than pick one and continue — read as: close out this
+line of work for now, at the verified-blocker checkpoint, rather than force a choice or a
+partial/compromised result under a real, demonstrated infrastructure constraint.
+
+**Decision:** Real-dataset integration is recorded as **attempted and blocked, not abandoned and
+not silently dropped.** `README.md`, `docs/limitations.md`, and `docs/acceptance-criteria.md` are
+updated (same commit as this log entry) to say so explicitly — "top open item, blocked on verified
+network infeasibility, not merely unscheduled" — replacing the earlier, now-stale framing that
+implied it simply hadn't been gotten to yet. The four options from RL-6/`real-dataset-integration.md`
+§11 remain live and undecided, preserved exactly as documented, for whenever this is picked back up
+(by this project or a future session with a different network path).
+
+**Reason:** The project's whole discipline (D-005, D-008, D-010, D-011, D-012) has been: find a
+real problem, investigate it, report it accurately, and don't let documentation drift into
+implying something is further along (or further blocked, or resolved) than it actually is. A
+"wrap up" instruction is itself a request to bring the documentation into that same honest,
+current state — not a request to manufacture a result the underlying infrastructure constraint
+doesn't support.
+
+**Impact:** This closes the real-dataset-integration thread for this session at a clean,
+fully-documented, honestly-labeled checkpoint. The synthetic-validation track (F1≈0.823 baseline,
+full 13-milestone product, Docker-verified offline operation) remains the complete, working,
+regression-protected deliverable — untouched by any of this session's real-dataset investigation,
+confirmed by `git diff --stat` showing zero changes to `src/`, `tests/`, `scripts/`, or the Docker
+files across the entire CTU-13 research arc.
