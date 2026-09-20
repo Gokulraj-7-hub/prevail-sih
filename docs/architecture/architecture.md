@@ -1,5 +1,7 @@
 # PREVAIL — System Architecture
 
+![PREVAIL system architecture](architecture-diagram.svg)
+
 Status: DRAFT v0.1
 
 ## 1. Design principles

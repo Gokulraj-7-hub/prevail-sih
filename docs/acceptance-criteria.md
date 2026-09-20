@@ -54,13 +54,13 @@ Tracks master prompt §36 literally. Updated 2026-09-20, single continuous auton
 
 ## SIH
 
-- [ ] architecture diagram (visual/graphic, not just the text diagrams in `docs/architecture/architecture.md`) — not produced this pass
-- [ ] results charts (visual plots, not just markdown tables) — not produced this pass; all results exist as real numbers in `docs/experiments/*.md` and `artifacts/*/manifest.json`, just not yet rendered as chart images
+- [x] architecture diagram — `docs/architecture/architecture-diagram.svg`, embedded in `architecture.md`
+- [x] results charts — `scripts/generate_result_charts.py` renders 5 charts directly from the real `artifacts/*.json`/`manifest.json` data (no new numbers, just visualized), embedded in the relevant `docs/experiments/*.md`
 - [x] demo dataset — the synthetic dataset, `data/raw/synthetic_packets.csv`, baked into the Docker image
 - [x] 2-minute demo flow — `docs/demo/demo-script.md`
-- [ ] presentation material (slide deck) — not produced this pass
-- [~] technical report — this repository's `docs/` tree functions as one, but no single consolidated PDF/deck-style report document has been assembled
+- [ ] presentation material (slide deck) — not produced this pass; the diagram, charts, and demo script it would be built from all exist
+- [~] technical report — this repository's `docs/` tree functions as one (24 markdown docs, all cross-linked), but no single consolidated PDF/deck-style report document has been assembled
 
 ## Honest summary
 
-Every research, data, ML, innovation, evaluation, and core-product checkbox is genuinely done and verified against real (synthetic) results in this repo. The gaps are: (1) real-dataset integration — the single most consequential remaining item, tracked everywhere as the top open question; (2) a handful of SIH-presentation-specific deliverables (slide deck, rendered chart images, a formal architecture diagram graphic) that are packaging work over already-real content, not new research or engineering; (3) a few security-hardening items correctly scoped as "Planned" rather than falsely marked done (auth layer, CSP, dependency-audit automation, subprocess-isolated binary PCAP parsing).
+Every research, data, ML, innovation, evaluation, and core-product checkbox is genuinely done and verified against real (synthetic) results in this repo, including a fully working, live-tested Docker deployment. The gaps are: (1) real-dataset integration — the single most consequential remaining item, tracked everywhere as the top open question; (2) a formal slide deck for live SIH presentation (the demo script, architecture diagram, and result charts that would feed one all exist, just not assembled into slides); (3) a few security-hardening items correctly scoped as "Planned" rather than falsely marked done (auth layer, CSP, dependency-audit automation, subprocess-isolated binary PCAP parsing).

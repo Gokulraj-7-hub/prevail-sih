@@ -4,6 +4,8 @@
 
 Logistic Regression baseline (same one-step-ahead forecasting task as `docs/experiments/baseline.md`), retrained from scratch on each feature subset, same train/test scenario split, same seed. Isolates the feature-family effect from World Model architecture choices.
 
+![Feature family ablation](../../artifacts/charts/feature_family_ablation.png)
+
 | Feature family | # features | F1 | ROC-AUC | FPR |
 |---|---|---|---|---|
 | flow-only | 33 | 0.700 | 0.851 | 0.136 |

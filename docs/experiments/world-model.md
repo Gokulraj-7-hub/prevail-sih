@@ -7,6 +7,8 @@
 - Training: AdamW, lr 1e-3, weight decay 1e-4, batch 32, early stopping patience 15 on val loss. Converged at epoch 26, best val loss 0.167.
 - Artifacts: `artifacts/world_model/world_model_v1.pt`, `scaler.joblib`, `manifest.json`.
 
+![Baseline vs World Model](../../artifacts/charts/baseline_vs_world_model.png)
+
 ## One-step evaluation (test scenarios, Phase 12)
 
 | Metric | Value | Reading |

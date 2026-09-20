@@ -4,6 +4,8 @@
 
 Scenario `scn_009_attack` (held-out test scenario), same current state as `docs/experiments/attack-stage.md` Case B (initial_access in progress, T+1 baseline forecast already at P(attack)=0.618, escalating to lateral_movement by T+3).
 
+![Intervention comparison](../../artifacts/charts/intervention_comparison.png)
+
 Two interventions tested, both mechanically correct per `docs/architecture/intervention-model.md` (packet-level filter -> real feature re-extraction -> `is_out_of_distribution` sanity check -> re-rollout):
 
 | Intervention | OOD score | T+1 P(attack) | T+2 | T+3 | T+4 | T+5 |

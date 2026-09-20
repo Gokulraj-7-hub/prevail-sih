@@ -4,6 +4,8 @@
 
 460 rollout trajectories built from the 10 held-out test scenarios (every valid start position with >=5 future in-scenario windows). Same World Model V1 checkpoint as `docs/experiments/world-model.md`, rolled out autoregressively per `rollout/rollout.py` (sliding-window history, no ground truth fed back in after step 1).
 
+![K-step error accumulation](../../artifacts/charts/k_step_error_accumulation.png)
+
 ## Error accumulation across K = 1, 2, 3, 5
 
 | Step | Normalized MSE | Cosine similarity | Stage accuracy | F1 | FPR | Mean P(attack) |

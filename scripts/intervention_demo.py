@@ -2,6 +2,7 @@
 """Milestone 9: defensive what-if simulator demo -- baseline vs. counterfactual
 K-step forecast on the same held-out scenario/window used in Milestone 7-8's
 demos (docs/experiments/attack-stage.md Case B)."""
+import json
 import sys
 from pathlib import Path
 
@@ -79,6 +80,12 @@ def main():
         base_stage = ATTACK_STAGES[baseline_probs[k].argmax()]
         print(f"T+{k+1:<4}{base_stage:<22}{1.0 - baseline_probs[k, benign_idx]:<20.3f}")
 
+    results_for_chart = {
+        "scenario_id": demo_scenario,
+        "baseline_p_attack": [float(1.0 - baseline_probs[k, benign_idx]) for k in range(K)],
+        "interventions": [],
+    }
+
     for spec in specs:
         modified_current = compute_modified_current_state(
             scenario_packets, scenario_states, target_window_id, window_size_s=5.0,
@@ -97,6 +104,19 @@ def main():
             p_base = 1.0 - baseline_probs[k, benign_idx]
             p_cf = 1.0 - cf_probs[k, benign_idx]
             print(f"T+{k+1:<4}{p_cf:<26.3f}{p_cf - p_base:+.3f}")
+
+        results_for_chart["interventions"].append({
+            "name": spec.name,
+            "description": spec.description,
+            "ood_score": ood,
+            "ood_flagged": flagged,
+            "counterfactual_p_attack": [float(1.0 - cf_probs[k, benign_idx]) for k in range(K)],
+        })
+
+    out_dir = ROOT / "artifacts" / "intervention"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_dir / "demo_comparison.json", "w") as f:
+        json.dump(results_for_chart, f, indent=2)
 
     print(
         "\nReading: the model FORECASTS a probability change under each simulated "

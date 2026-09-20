@@ -1,0 +1,38 @@
+{
+  "scenario_id": "scn_009_attack",
+  "baseline_p_attack": [
+    0.6183728373214048,
+    0.5984797402660192,
+    0.9224634739311135,
+    0.9999675066034968,
+    1.0
+  ],
+  "interventions": [
+    {
+      "name": "block_destination_port(8080)",
+      "description": "Drop all traffic destined for port 8080 (e.g. firewall rule on a specific service port).",
+      "ood_score": 0.5844976970894249,
+      "ood_flagged": false,
+      "counterfactual_p_attack": [
+        0.9380234708563191,
+        0.9949675066034968,
+        1.0,
+        0.997970297029703,
+        0.9979378036331997
+      ]
+    },
+    {
+      "name": "isolate_host(4.87.19.8)",
+      "description": "Remove all traffic to/from 4.87.19.8 from the current window.",
+      "ood_score": 0.5471668332923277,
+      "ood_flagged": false,
+      "counterfactual_p_attack": [
+        0.9899675066034967,
+        0.9949675066034968,
+        1.0,
+        0.987970297029703,
+        0.997970297029703
+      ]
+    }
+  ]
+}

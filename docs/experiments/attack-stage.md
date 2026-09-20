@@ -4,6 +4,8 @@
 
 Independent Random Forest classifier (`attack_stage/model.py`), trained on ground-truth states -> normalized attack_stage (all 1800 train-scenario windows, both benign and attack), architecturally separate from the World Model's own auxiliary head per `architecture.md`'s module boundary (this classifier is the one applied to both real states and rollout output).
 
+![Attack stage per-class precision/recall](../../artifacts/charts/attack_stage_per_class.png)
+
 ## Classification report (600 held-out test-scenario states)
 
 | Stage | Precision | Recall | F1 | Support |
