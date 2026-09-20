@@ -106,3 +106,91 @@ download block that validation work.
 
 **Impact:** Recorded as OQ-2 with an explicit warning: synthetic-data results must never be
 presented as PS-evidence of real detection/forecasting performance, only as pipeline validation.
+
+---
+
+## RL-5 — 2026-09-20
+
+**Question:** Following up on OQ-2/D-003 — now that the full synthetic-data pipeline (Milestones
+1-13) is built and working, which real public network-security dataset should PREVAIL integrate,
+and does any candidate genuinely support multi-stage attack-progression labels (recon -> initial
+access -> lateral movement -> C2) rather than just flat attack-type classification?
+
+**Sources checked:** UNB CIC-IDS2017/CSE-CIC-IDS2018 official pages, AWS Open Data registry for
+CSE-CIC-IDS2018, Stratosphere Lab CTU-13 page + FAQ + a fetched scenario README/directory listing
+(CTU-Malware-Capture-Botnet-43), UNSW-NB15 feature/statistics writeups, CICIoT2023 IEEE DataPort
+listing, Engelen et al. "Troubleshooting an Intrusion Detection Dataset: the CICIDS2017 Case
+Study" (documented CICFlowMeter bugs and labeling errors), multiple independent sources on
+NSL-KDD/KDD-99 obsolescence. Full citation list in `docs/research/real-dataset-integration.md`.
+
+**Finding:** None of the 5 mainstream candidates (CIC-IDS2017, CSE-CIC-IDS2018, CTU-13, UNSW-NB15,
+CICIoT2023) provide native ground-truth multi-stage kill-chain labels. Four of them (all except
+CTU-13) are structured as discrete, scheduled attack-tool exercises with flat attack-type labels
+and only weak/no temporal-campaign continuity. CTU-13 is the one exception: a genuinely
+continuous, multi-hour real botnet capture, but its native labels are only 4 flat categories
+(Background/Normal/Botnet/C&C) — only `benign` and `command_and_control` map onto PREVAIL's
+stage vocabulary with real evidence; `recon`/`initial_access`/`lateral_movement` are
+**unavailable** as ground truth in CTU-13 and must not be invented. Also found: PREVAIL's
+ingestion contract expects packet-level rows, but every candidate dataset is distributed
+primarily as pre-aggregated flow records (CICFlowMeter/Argus/NetFlow) — meaning the real adapter
+needed is a PCAP-to-PacketEvent parser (new code), not a flow-feature mapper, after which
+`features/`, `states/`, `sequences/`, `baselines/`, `world_model/`, `evaluation/` need zero
+changes. One CTU-13 scenario's truncated pcap (Botnet-43/Neris) is a feasibly small 35MB given
+this environment's measured slow/flaky network, versus CIC-IDS2017's 50GB+ PCAPs or
+CSE-CIC-IDS2018's ~480GB.
+
+**Decision:** Recommend CTU-13 (specifically, starting with one small scenario, e.g. Botnet-43,
+before committing to a multi-scenario download for a proper scenario-level train/test split),
+evaluated on a reduced/honestly-scoped stage vocabulary (binary attack/benign + a distinguishable
+C&C sub-case), not the full 5-stage synthetic vocabulary. Full reasoning, feature-mapping table,
+leakage risks, and a proposed-but-not-implemented integration plan written to
+`docs/research/real-dataset-integration.md`. **Stopped after the research document per explicit
+instruction** — no adapter code, tests, or pipeline runs against real data in this pass.
+
+**Reason:** Master prompt's "no fake novelty"/"never invent a requirement" discipline extends
+directly to labels: presenting an inferred/heuristic stage assignment as if it were the same kind
+of ground truth as the synthetic generator's simulator-assigned `attack_stage` would misrepresent
+the evidentiary basis of any resulting metric. Temporal continuity was prioritized over raw
+popularity/prior-work-volume because it's the property PREVAIL's entire premise (`P(S_t+1|S_t)`,
+K-step rollout, "trajectory") depends on — a dataset without it would produce technically-runnable
+but conceptually-hollow results.
+
+**Impact:** Real-dataset integration, once implemented, will report on a narrower label set than
+the synthetic track for the attack-stage/ATT&CK-mapping/K-step-forecast-of-specific-stage results
+— this must be stated explicitly in `README.md`/`docs/limitations.md` once real results exist, and
+real-dataset metrics must never be combined into the same score/table as the synthetic F1≈0.823
+baseline (which remains the frozen regression reference — new dataset gets its own experiment
+namespace under `artifacts/evaluation/real_dataset/`).
+
+## RL-6 — 2026-09-20
+
+**Question:** Is RL-5's CTU-13 recommendation, and the assumptions it rests on, actually correct —
+verified against authoritative sources and a real download attempt, not just RL-5's own reasoning?
+(User-directed Phase 1 verification step before any adapter code.)
+
+**Sources checked:** `stratosphereips.org/datasets-ctu13` (live fetch), scenario READMEs for
+CTU-Malware-Capture-Botnet-42/43/54 (live fetch), direct `curl` connection/download attempts against
+`mcfp.felk.cvut.cz` (3 repeated real download attempts, plus HEAD-request probes), a Kaggle/mirror
+search for alternative hosting.
+
+**Finding:** Two RL-5 assumptions were wrong (see `DECISIONS.md` D-012 and
+`docs/research/real-dataset-integration.md` §9 for full detail): (1) the small ~35-109MB per-scenario
+pcap is attack-traffic-only, not the full scenario — the file actually needed for benign+attack
+coverage is a separate 843MB-1.2GB truncated full-traffic pcap; (2) labels are unidirectional Argus
+with compound label strings, not "bidirectional, 4 flat categories." More consequentially: real
+download attempts against the required file's host showed ~65% per-attempt connection failure and
+~17 KB/s sustained transfer on the one successful attempt — extrapolating to 14-20+ hours for the
+actually-needed file, with a high chance of failing mid-transfer.
+
+**Decision:** STOP before writing any adapter code (Phase 2 of the approved plan). Corrected
+`docs/research/real-dataset-integration.md` in place. Reported the blocker and options back to the
+user rather than proceeding, silently working around it, or picking a fallback unilaterally.
+
+**Reason:** This is precisely the situation the approved plan's own "STOP CONDITIONS" section
+anticipated ("CTU-13 cannot be obtained/accessed as expected... do not hide these issues") — treating
+it as designed-for rather than as a failure to route around quietly.
+
+**Impact:** No CTU-13 adapter code exists yet. `README.md`/`docs/limitations.md` continue to
+correctly state real-dataset integration as the top open item; this entry is the record of why it's
+still open despite two full research passes, so a future session doesn't have to re-derive the same
+finding from scratch.

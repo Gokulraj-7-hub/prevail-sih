@@ -27,14 +27,21 @@ acquired. Competitor repos use CTU-13, CSE-CIC-IDS2018, CIC-IDS-2017, UNSW-NB15,
 all real, standard, publicly documented network-security datasets, but none are pre-downloaded
 here (some run to multiple GB and may require registration or slow download).
 
-**Decision needed before Milestone 3 (Data Pipeline):** either (a) download a real public
-dataset (CTU-13 is the smallest of the four competitor-used options and is CC-BY licensed with
-direct download links — good first candidate), or (b) build a clearly-labeled **synthetic
-validation dataset** first to prove the pipeline (windowing → state → sequence → leakage checks)
-end-to-end per master prompt §2.2 ("build the simplest scientifically valid version first"),
-then swap in real data once the pipeline is proven. Recorded in `research-log.md` as RD-1;
-current default decision is (b) then (a), to avoid blocking pipeline validation on a large
-download, but this is a decision to revisit with the team, not a final answer.
+**Status update (2026-09-20, post-build):** (b) was done — the synthetic validation dataset and
+full pipeline exist and are documented throughout `docs/experiments/`. (a) was then attempted
+twice: a research-only pass recommended CTU-13 (`docs/research/real-dataset-integration.md`
+§1-§8), and a follow-up Phase 1 verification pass found two of that pass's assumptions were wrong
+and, more consequentially, a **hard download-feasibility blocker**: the actually-required CTU-13
+file (843MB-1.2GB full-traffic truncated pcap; the small ~35-109MB pcap turned out to be
+attack-traffic-only) could not be reliably downloaded from this environment's network — ~65%
+per-attempt connection failure and ~17 KB/s sustained transfer when it did connect, extrapolating
+to 14-20+ hours with a high chance of failing mid-transfer. See `docs/research/
+real-dataset-integration.md` §9-§11 and `DECISIONS.md` D-012 for full detail. **This remains the
+single most consequential open item in the repo** — not for lack of a plan, but for lack of a
+reliable way to obtain the data in this environment. Options recorded for a future session/user
+decision: retry later or from a different network, a scoped-down attack-only-pcap partial
+validation (no benign-class real results), pursuing an alternative file/format on the same host,
+or continuing to defer.
 
 **Do not report evaluation metrics from a synthetic dataset as if they were results on real
 attack telemetry** — any synthetic-data results must be labeled "pipeline validation on
