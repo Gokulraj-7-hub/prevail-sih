@@ -73,3 +73,45 @@ Format per master prompt §34: Decision / Context / Alternatives / Evidence / Ch
 **Reason:** Real low-and-slow attack techniques (C2 beaconing, slow exploit attempts) are *specifically* low-volume relative to background traffic — that's what makes them hard to detect and exactly what a forecasting system needs to catch. A labeling rule that defines them out of existence whenever benign traffic is present would make the ground truth unfit for the problem PREVAIL is meant to solve.
 
 **Trade-offs:** Presence-based labeling is more sensitive to the `MIN_ATTACK_PACKET_PRESENCE` threshold (currently 2, chosen to filter single-packet noise while catching real C2 beacons/exploit bursts) — worth revisiting once a real dataset is integrated, since its packet-per-window density will differ from the synthetic generator's.
+
+---
+
+## D-006: Logistic Regression baseline predicts one-step-ahead, not same-instant, attack label
+
+**Context:** Master prompt Phase 9 is deliberately vague about baseline input/output ("current state / allowed historical aggregate features" -> "attack probability / required baseline target"), likely because most competitor implementations use it as a plain same-instant classifier.
+
+**Alternatives:** (a) same-instant baseline: predict whether the *current* window is an attack, standard IDS-style; (b) one-step-ahead baseline: predict whether the *next* window is an attack, using only the current window's features as input.
+
+**Chosen option:** (b).
+
+**Reason:** PREVAIL's central claim (master prompt Sec 1) is that a World Model forecasts *future* states, distinct from a same-instant classifier. For FR-15 ("evaluate against baseline") to be a meaningful test of that claim, the baseline must be asked to solve the *same forecasting task* the World Model solves (predict t+1 from t), not an easier same-instant classification task — otherwise a baseline "win" or "loss" wouldn't isolate the thing PREVAIL is actually claiming to do better.
+
+**Evidence:** Implemented in `baselines/logistic_regression.py::current_state_input` (takes the last historical timestep of each built sequence as input, `y_label` of the sequence's target window as the one-step-ahead label). First run on synthetic data: test F1 0.823, ROC-AUC 0.870, FPR 0.050 — plausible, not suspiciously perfect (contrast with OQ-5's flagged competitor claiming 0 FPs), which is itself weak evidence against a labeling/leakage bug.
+
+**Trade-offs:** This makes the baseline harder to beat than a same-instant classifier would be (forecasting is intrinsically harder than nowcasting), which is the honest comparison PREVAIL needs, not the easiest one to win.
+
+---
+
+## D-007: Single regression head (Huber loss) for the World Model's state prediction, not separate per-type heads
+
+**Context:** Master prompt Phase 11 asks for separate continuous/binary/categorical loss heads when a state mixes feature types.
+
+**Chosen option:** Single Huber-loss regression head over the full 59-feature vector; a small auxiliary cross-entropy stage-classification head is trained jointly (weight 0.3) to sharpen the representation, but that head lives outside the state-prediction path used for K-step rollout.
+
+**Reason:** PREVAIL v1's feature registry (data-contract.md Sec 3) is homogeneously continuous/ratio-valued -- no one-hot categorical or true binary fields ended up in the feature vector itself, so Phase 11's premise (mixed types needing mixed losses) doesn't apply to this feature set. Huber loss is used instead of plain MSE specifically because several features (byte/packet counts) are heavy-tailed and MSE would let a few extreme-traffic windows dominate the gradient.
+
+**Trade-offs:** If a future feature version adds genuinely categorical/binary fields (e.g. a one-hot protocol encoding instead of ratios), this decision should be revisited and the multi-head design implemented as originally specified.
+
+---
+
+## D-008: One-step feature-level error must be reported in standardized units, not raw units
+
+**Context:** First run of `evaluation.one_step.feature_level_error` ranked "worst predicted features" by raw MSE and put `temporal__rolling_var_bytes_sum` at the top with an MSE of ~1.6e16 -- a number so large it's meaningless on its own, and it crowded out genuinely informative ranking of which features the model actually struggles with.
+
+**Chosen option:** Report both raw-unit MAE/MSE (for human-readable magnitude) and standardized MAE/MSE (error divided by the train-set feature std, i.e. the same units the model is actually trained/optimized in) -- ranking of "worst" features uses the standardized value.
+
+**Evidence:** Post-fix, overall normalized MSE = 0.369 on the held-out test scenarios (a "predict the training mean" baseline would score ~1.0 by construction of the normalization), and the worst-ranked features became `tcp_fin_ratio`, `delta_packets_sum`, `delta_new_connection_count` -- plausible, moderate-difficulty features, not an artifact of feature scale.
+
+**Reason:** Raw-unit MSE across features with wildly different natural scales (a [0,1] ratio vs. a rolling variance of byte-count sums) isn't comparable and produces a misleading "worst features" ranking that would mislead any later ablation/architecture decision made by reading this report.
+
+**Trade-offs:** None material -- this is a strictly more correct evaluation; raw units are kept alongside for interpretability, not removed.
