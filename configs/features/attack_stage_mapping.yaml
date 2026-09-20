@@ -1,0 +1,87 @@
+# Normalized behavioural stage -> MITRE ATT&CK mapping (master prompt Phase 18, FR-13).
+#
+# Three-layer chain: dataset-native label (synthetic generator's per-packet
+# attack_stage) -> normalized behaviour (prevail.common.schema.ATTACK_STAGES)
+# -> ATT&CK tactic/technique (this file). Never invented by an unconstrained
+# LLM; every entry below is a manual mapping with an explicit confidence and
+# rationale, reviewable and versioned (master prompt: "do not allow an LLM to
+# autonomously invent ATT&CK mappings").
+#
+# ATT&CK version referenced: v15 (Enterprise), tactic/technique IDs as of
+# 2026-09-20. Not independently re-verified against the live MITRE site in
+# this pass -- flag for review before any public claim, per master prompt's
+# "Not verified" discipline.
+
+schema_version: 1
+attck_version_referenced: "Enterprise ATT&CK v15 (not independently re-verified this pass)"
+
+mappings:
+  benign:
+    tactic: null
+    technique: null
+    confidence: n/a
+    rationale: "No offensive behaviour indicated; not an ATT&CK-mapped stage."
+    review_status: not_applicable
+
+  recon:
+    tactic: {id: TA0043, name: Reconnaissance}
+    technique: {id: T1595, name: "Active Scanning", sub: "T1595.001 Scanning IP Blocks"}
+    confidence: medium
+    rationale: >
+      Synthetic behaviour is a single external source sweeping many
+      destination ports against one internal host in a short window
+      (high dst-port entropy, high failed-connection ratio, high
+      port_scan_score). This is a clean behavioural match for active
+      port scanning. Confidence is "medium" not "high" because the
+      synthetic generator does not distinguish scan tooling/fingerprint
+      (e.g. nmap timing signature) -- only the aggregate traffic pattern.
+    review_status: draft_needs_human_review
+
+  initial_access:
+    tactic: {id: TA0001, name: "Initial Access"}
+    technique: {id: T1190, name: "Exploit Public-Facing Application"}
+    confidence: low
+    rationale: >
+      Synthetic behaviour is a burst of repeated connection attempts to a
+      single non-standard port (8080) from the same external source that
+      performed recon, eventually succeeding. This is consistent with an
+      exploitation attempt against an exposed service, but the synthetic
+      generator does not model an actual exploit payload/signature -- only
+      connection-attempt cadence and eventual success. Confidence is
+      deliberately "low": the *tactic* (Initial Access) is well-supported
+      behaviourally, the specific *technique* (T1190 vs. e.g. T1133 External
+      Remote Services) is a plausible but not evidenced choice given the
+      available synthetic signal. Master prompt Phase 18: "do not claim a
+      technique when the evidence only supports a broad tactic" -- this
+      entry is kept at technique-level for completeness but its confidence
+      must be read accordingly; UI must not present this as certain.
+    review_status: draft_needs_human_review
+
+  lateral_movement:
+    tactic: {id: TA0008, name: "Lateral Movement"}
+    technique: {id: T1021, name: "Remote Services", sub: "T1021.002 SMB/Windows Admin Shares (best-fit among ports used)"}
+    confidence: medium
+    rationale: >
+      Synthetic behaviour is the compromised host initiating connections to
+      multiple other internal hosts on SMB/RDP/SSH-family ports (445, 3389,
+      22, 135, 139) shortly after initial access. Tactic mapping is
+      well-supported (internal host originating new internal connections
+      post-compromise). Technique is a best-fit given the specific ports
+      used by the generator, but a real capture would need protocol-level
+      evidence (not just port number) to confirm T1021.002 specifically vs.
+      another T1021 sub-technique.
+    review_status: draft_needs_human_review
+
+  command_and_control:
+    tactic: {id: TA0011, name: "Command and Control"}
+    technique: {id: T1071, name: "Application Layer Protocol"}
+    confidence: low
+    rationale: >
+      Synthetic behaviour is periodic, low-jitter, small-payload beaconing
+      from the compromised host to an external IP on a fixed port. This is
+      a generic C2-beaconing *pattern* match (regular interval, small
+      payload, single external destination) but the synthetic generator
+      does not simulate actual protocol content (e.g. real HTTP/DNS
+      tunneling), so a more specific sub-technique (e.g. T1071.001 Web
+      Protocols) is NOT claimed. Confidence "low" is deliberate.
+    review_status: draft_needs_human_review
