@@ -57,3 +57,19 @@ Format per master prompt §34: Decision / Context / Alternatives / Evidence / Ch
 **Reason:** Matches the offline/air-gapped non-functional requirement (NFR) and the "start with a small Transformer" guidance (§13) — CPU is sufficient for the small model sizes specified.
 
 **Trade-offs:** Training larger models later would need GPU provisioning; out of scope for V1.
+
+---
+
+## D-005: Window attack-stage labeling is presence-based, not majority-vote
+
+**Context:** First implementation of `_window_attack_stage` (states/builder.py) used pure majority vote across packets in a window. Running the pipeline against the synthetic dataset showed **zero** windows labeled `initial_access` or `command_and_control` despite both stages being generated — every one of those windows' sparse attack packets (a handful of exploit attempts or a single C2 beacon) was outnumbered by concurrent benign background traffic (4-10 pkt/s) and outvoted to `benign`.
+
+**Alternatives:** (a) keep majority vote, accept that low-volume attack stages are undetectable at the labeling stage; (b) presence-based labeling — any non-benign stage with packet count >= a small threshold (2) wins, regardless of benign volume in the same window.
+
+**Evidence:** Post-fix label distribution moved from `{benign: 2148, recon: 136, lateral_movement: 116}` (initial_access=0, c2=0) to a distribution including all 4 attack stages (see `artifacts/data_quality_report.html`, regenerated after the fix).
+
+**Chosen option:** (b).
+
+**Reason:** Real low-and-slow attack techniques (C2 beaconing, slow exploit attempts) are *specifically* low-volume relative to background traffic — that's what makes them hard to detect and exactly what a forecasting system needs to catch. A labeling rule that defines them out of existence whenever benign traffic is present would make the ground truth unfit for the problem PREVAIL is meant to solve.
+
+**Trade-offs:** Presence-based labeling is more sensitive to the `MIN_ATTACK_PACKET_PRESENCE` threshold (currently 2, chosen to filter single-packet noise while catching real C2 beacons/exploit bursts) — worth revisiting once a real dataset is integrated, since its packet-per-window density will differ from the synthetic generator's.
