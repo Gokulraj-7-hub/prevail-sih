@@ -2,6 +2,7 @@
 outbound network calls anywhere in this module (SRS.md offline NFR)."""
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 
 import numpy as np
@@ -11,12 +12,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from prevail.api.dataset_store import DatasetStore, IngestionError
 from prevail.api.registry import ModelRegistry
 from prevail.api.schemas import (
-    AnalyzeRequest, AnalyzeResponse, ForecastRequest, ForecastResponse, ForecastStep,
+    AnalyzeRequest, AnalyzeResponse, ExplainRequest, ExplainResponse, FeatureEvidence,
+    ForecastRequest, ForecastResponse, ForecastStep,
     HealthResponse, InterventionRequest, InterventionResponse, InterventionStepComparison,
-    ModelInfo, RolloutResponse, UploadResponse,
+    ModelInfo, RolloutResponse, TemporalEvidence, UploadResponse,
 )
 from prevail.attack_stage.model import predict_stage_probs
 from prevail.common.schema import ATTACK_STAGES
+from prevail.explainability.shap_explain import explain_state
+from prevail.explainability.temporal import temporal_window_importance
 from prevail.intervention import interventions as iv
 from prevail.intervention.simulator import (
     build_counterfactual_history, compute_modified_current_state,
@@ -38,11 +42,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="PREVAIL API", version="0.1.0", lifespan=lifespan)
 
-# Explicit origin allowlist -- no "*" (threat-model.md CORS row). Dev defaults only;
-# a non-localhost deployment must override this via config, not code.
+# Explicit origin allowlist -- no "*" (threat-model.md CORS row). Configurable
+# via PREVAIL_CORS_ORIGINS (comma-separated) so a non-default dev port (or a
+# real deployment host) doesn't require a code change; defaults cover the
+# standard local frontend dev/start ports only.
+_default_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+_extra_origins = [o.strip() for o in os.environ.get("PREVAIL_CORS_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_default_origins + _extra_origins,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -83,6 +91,14 @@ async def upload_dataset(file: UploadFile = File(...)):
         scenario_ids=store.scenario_ids(dataset_id),
         n_states=len(ds["states"]),
     )
+
+
+@app.get("/api/v1/datasets/{dataset_id}/scenarios")
+def list_scenarios(dataset_id: str):
+    try:
+        return {"dataset_id": dataset_id, "scenario_ids": store.scenario_ids(dataset_id)}
+    except KeyError:
+        raise HTTPException(404, f"Unknown dataset_id: {dataset_id}")
 
 
 @app.post("/api/v1/analyze", response_model=AnalyzeResponse)
@@ -179,6 +195,44 @@ def simulate_intervention(req: InterventionRequest):
         ood_score=ood, ood_flagged=is_out_of_distribution(modified_current, registry.wm_scaler.mean_, registry.wm_scaler.std_),
         comparison=comparison,
     )
+
+
+@app.post("/api/v1/explain", response_model=ExplainResponse)
+def explain(req: ExplainRequest):
+    history, _, _ = _history_for(req.dataset_id, req.scenario_id, req.end_window_id, req.seq_len)
+    out = k_step_rollout_batch(registry.world_model, registry.wm_scaler, history[None, :, :], K=1)
+    predicted_next_state = out["states"][0, 0]
+
+    probs = predict_stage_probs(registry.stage_scaler, registry.stage_clf, predicted_next_state[None, :])[0]
+    predicted_class_idx = int(probs.argmax())
+    predicted_stage = ATTACK_STAGES[predicted_class_idx]
+
+    feature_evidence = explain_state(
+        registry.stage_scaler, registry.stage_clf, predicted_next_state, registry.feature_columns, predicted_class_idx,
+    )
+    temporal_evidence = temporal_window_importance(registry.world_model, registry.wm_scaler, history)
+
+    return ExplainResponse(
+        scenario_id=req.scenario_id,
+        predicted_stage=predicted_stage,
+        feature_evidence=[FeatureEvidence(**e) for e in feature_evidence],
+        temporal_evidence=[
+            TemporalEvidence(label=t["label"], importance_normalized=t["importance_normalized"])
+            for t in sorted(temporal_evidence, key=lambda d: -d["importance"])
+        ],
+        disclaimer=(
+            "Evidence shows what the model's prediction is sensitive to. "
+            "It is NOT a causal explanation of the underlying network activity."
+        ),
+    )
+
+
+@app.get("/api/v1/attack-mapping")
+def attack_mapping():
+    return {
+        "attck_version_referenced": registry.attack_mapper.attck_version_referenced,
+        "mappings": registry.attack_mapper.mappings,
+    }
 
 
 @app.get("/api/v1/models", response_model=list[ModelInfo])

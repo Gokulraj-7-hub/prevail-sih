@@ -91,6 +91,32 @@ class InterventionResponse(BaseModel):
     )
 
 
+class ExplainRequest(BaseModel):
+    dataset_id: str
+    scenario_id: str
+    end_window_id: Optional[int] = None
+    seq_len: int = Field(10, ge=1, le=50)
+
+
+class FeatureEvidence(BaseModel):
+    feature: str
+    shap_value: float
+    direction: str
+
+
+class TemporalEvidence(BaseModel):
+    label: str
+    importance_normalized: float
+
+
+class ExplainResponse(BaseModel):
+    scenario_id: str
+    predicted_stage: str
+    feature_evidence: list[FeatureEvidence]
+    temporal_evidence: list[TemporalEvidence]
+    disclaimer: str
+
+
 class ModelInfo(BaseModel):
     name: str
     manifest: dict
