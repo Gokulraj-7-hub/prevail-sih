@@ -111,13 +111,16 @@ def analyze(req: AnalyzeRequest):
     if len(sdf) == 0:
         raise HTTPException(404, f"Unknown scenario_id: {req.scenario_id}")
     latest = sdf.iloc[-1]
+    has_true = bool(ds["has_true_attack_stage_labels"])
     return AnalyzeResponse(
         scenario_id=req.scenario_id,
         n_windows=len(sdf),
         latest_window_id=int(latest["window_id"]),
-        latest_attack_stage=latest["attack_stage"],
+        latest_attack_stage=latest["attack_stage"] if has_true else "Not available",
         latest_attack_label=int(latest["attack_label"]),
         window_size_s=ds["window_size_s"],
+        attack_stage_source="true_attack_stage_labels" if has_true else "binary-only (no true stage labels in upload)",
+        has_true_attack_stage_labels=has_true,
     )
 
 

@@ -40,6 +40,9 @@ class DatasetStore:
             "states": pd.read_parquet(states_path),
             "window_size_s": 5.0,
             "source": "synthetic validation dataset (see DECISIONS.md D-003)",
+            "has_true_attack_stage_labels": True,
+            "has_timestamp": True,
+            "attack_stage_source": "true_stage (synthetic ground-truth)",
         }
 
     def ingest_bytes(self, raw_bytes: bytes, window_size_s: float = 5.0) -> str:
@@ -60,6 +63,24 @@ class DatasetStore:
         if len(packets) == 0:
             raise IngestionError("Uploaded telemetry contained no valid rows after cleaning")
 
+        # Honesty gate (spec S14/S19 + DECISIONS.md D-013): record whether the
+        # uploaded telemetry actually carried true attack-stage ground-truth
+        # labels. Derived from the real columns present post-clean -- never
+        # inferred, never fabricated. Drives the API so that binary-label-only
+        # datasets are reported as such instead of emitting a fabricated
+        # "benign" attack stage from _window_attack_stage's absence fallback.
+        has_true_attack_stage_labels = bool("attack_stage" in packets.columns)
+        has_timestamp = bool("timestamp" in packets.columns)
+        if not has_true_attack_stage_labels and "label" in packets.columns:
+            is_binary_label, label_values = _label_shape(packets["label"])
+        else:
+            is_binary_label, label_values = False, None
+        from prevail.api.profile import build_dataset_profile
+        profile = build_dataset_profile(
+            packets=packets, states=None, has_true_attack_stage_labels=has_true_attack_stage_labels,
+            has_timestamp=has_timestamp, window_size_s=window_size_s, source="user upload",
+        )
+
         states = build_states(packets, window_size_s=window_size_s)
         self._datasets[dataset_id] = {
             "packets": packets,
@@ -67,6 +88,13 @@ class DatasetStore:
             "window_size_s": window_size_s,
             "source": "user upload",
             "quality_report": quality_report.as_dict(),
+            "honesty": {
+                "has_true_attack_stage_labels": has_true_attack_stage_labels,
+                "has_timestamp": has_timestamp,
+                "is_binary_label": is_binary_label,
+                "label_values": label_values,
+                "profile": profile,
+            },
         }
         return dataset_id
 

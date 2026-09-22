@@ -11,6 +11,33 @@ class UploadResponse(BaseModel):
     n_states: int
 
 
+class DatasetProfile(BaseModel):
+    """Honest structural report derived ONLY from the columns/label/timestamp
+    signal actually present in the uploaded file. Nothing here is inferred,
+    fabricated, or about model output."""
+
+    dataset_id: str
+    n_rows: int
+    n_columns: int
+    filename: str
+    timestamp_column: Optional[str] = None
+    has_timestamp: bool
+    temporal_order_available: bool
+    timestamp_range: Optional[list[str]] = None
+    feature_columns: list[str]
+    n_numeric_features: int
+    n_categorical_features: int
+    label_column: Optional[str] = None
+    has_label: bool
+    label_cardinality: Optional[int] = None
+    label_values: Optional[list[str]] = None
+    is_binary_label: bool = False
+    has_true_attack_stage_labels: bool = False
+    attack_stage_source: str = "unavailable"
+    compatible: bool
+    warnings: list[str]
+
+
 class AnalyzeRequest(BaseModel):
     dataset_id: str
     scenario_id: str
@@ -23,6 +50,19 @@ class AnalyzeResponse(BaseModel):
     latest_attack_stage: str
     latest_attack_label: int
     window_size_s: float
+    # Honesty gate (spec S14/S19 + DECISIONS.md D-013): "unavailable" when the
+    # uploaded telemetry carried only binary attack labels (no true
+    # attack-stage ground-truth). NEVER emits a fabricated "benign" stage from
+    # _window_attack_stage's absence fallback for binary-only uploads.
+    attack_stage_source: str
+    has_true_attack_stage_labels: bool
+    # Honesty provenance for the stage claim above (spec S14/S19 + DECISIONS.md
+    # D-013). "true_true_attack_stage_labels" = real stage ground-truth was
+    # present in the uploaded telemetry. "binary_label_only" = the upload only
+    # carried a binary label, so there is NO true stage; "Not available" here
+    # must never be reported as if it were an observed stage.
+    attack_stage_source: str
+    has_true_attack_stage_labels: bool
 
 
 class ForecastRequest(BaseModel):
